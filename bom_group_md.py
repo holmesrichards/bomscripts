@@ -7,8 +7,7 @@
 #
 # Parts with "Config" field containing "dnf" are omitted.
 
-"""
-    @package
+"""@package
     Generate a Markdown BOM list.
     Components are sorted and grouped by value
     Fields are (if exist)
@@ -16,7 +15,12 @@
     Parts with "Config" field containing "dnf" are omitted.
 
     Command line:
-    python "pathToFile/bom_group_md.py" "%I" "%O_bom.md"
+    python "pathToFile/bom_group_md.py" "%I" "%O_bom.md" [--todocs]
+
+    If --todocs is used, replace path for output file with
+    /project/path/Docs where /project/path is the specified or
+    implicit directory or one at a higher level. If no such Docs
+    directory is found, specified or implicit path is used instead.
 """
 
 
@@ -27,6 +31,22 @@ import kicad_netlist_reader
 import sys
 import os.path
 
+def findDocs (path):
+    """
+    If path contains a directory named Docs, return relative path to
+    that directory, otherwise recursively look in higher
+    directories. If no such Docs directory is found return None.
+    """
+
+    if path == os.path.sep:
+        return
+    if path == "":
+        path = os.getcwd()
+    for p in os.listdir(path):
+        if p == "Docs" and os.path.isdir(os.path.join(path, p)):
+            return os.path.relpath(os.path.join(path, p))
+    return findDocs (os.path.dirname(path))    
+    
 # Start with a basic md template
 md = """# <!--SOURCE--> BOM
 
@@ -77,10 +97,26 @@ net = kicad_netlist_reader.netlist(sys.argv[1])
 
 # Open a file to write to, if the file cannot be opened output to stdout
 # instead
+if len(sys.argv) >= 3:
+    fname = sys.argv[2]
+else:
+    fname = "bom.md"
+
+# If --todocs specified try to find Docs directory and use that
+if len(sys.argv) >= 4 and sys.argv[3] == "--todocs":
+    fpath = findDocs(os.path.dirname(fname))
+    if fpath == None:
+        e = "No Docs directory found above " + os.getcwd()
+        print(__file__, ":", e, file=sys.stderr)
+    else:
+        fname = os.path.join(fpath, os.path.basename(fname))
+
 try:
-    f = open(sys.argv[2], 'w')
+    f = open(fname, 'w')
+    e = "Writing to file " + fname
+    print(__file__, ":", e, file=sys.stderr)
 except IOError:
-    e = "Can't open output file for writing: " + sys.argv[2]
+    e = "Can't open output file for writing: " + fname
     print(__file__, ":", e, file=sys.stderr)
     f = sys.stdout
 
