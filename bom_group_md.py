@@ -106,7 +106,7 @@ else:
 if len(sys.argv) >= 4 and sys.argv[3] == "--todocs":
     fpath = findDocs(os.path.dirname(fname))
     if fpath == None:
-        e = "No Docs directory found above " + os.getcwd()
+        e = "No Docs directory found above " + os.path.dirname(fname)
         print(__file__, ":", e, file=sys.stderr)
     else:
         fname = os.path.join(fpath, os.path.basename(fname))
