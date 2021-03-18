@@ -15,7 +15,7 @@
     Parts with "Config" field containing "dnf" are omitted.
 
     Command line:
-    python "pathToFile/bom_group_md.py" "%I" "%O_bom.md" [--todocs]
+    python "pathToFile/bom_group_md.py" netlist-file markdown-file [--todocs]
 
     If --todocs is used, replace path for output file with
     /project/path/Docs where /project/path is the specified or
