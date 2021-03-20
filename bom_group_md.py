@@ -70,6 +70,7 @@ def myEqu(self, other):
     ignored (they will match as both will be empty strings).
 
     """
+    cfields = ["Tolerance", "Manufacturer", "Part", "Vendor", "SKU", "Voltage"]
     result = True
     if self.getValue() != other.getValue():
         result = False
@@ -77,12 +78,11 @@ def myEqu(self, other):
         result = False
     elif self.getFootprint() != other.getFootprint():
         result = False
-    elif self.getField("Tolerance") != other.getField("Tolerance"):
-        result = False
-    elif self.getField("Manufacturer") != other.getField("Manufacturer"):
-        result = False
-    elif self.getField("Voltage") != other.getField("Voltage"):
-        result = False
+    else:
+        for cf in cfields:
+            if self.getField(cf) != other.getField(cf):
+                result = False
+                break
 
     return result
 
@@ -120,21 +120,12 @@ except IOError:
     print(__file__, ":", e, file=sys.stderr)
     f = sys.stdout
 
-# Output a set of rows for a header providing general information
+# Generate table rows
 
-md = md.replace('<!--SOURCE-->', os.path.basename(net.getSource()))
-md = md.replace('<!--DATE-->', net.getDate())
-md = md.replace('<!--TOOL-->', net.getTool())
-md = md.replace('<!--COMPCOUNT-->', "**Component Count:** " + \
-    str(len(net.components)))
+# Additional fields to print (if nonempty)
 
-row  = "| Value | Qty | Part | Description | Vendor |"
-
-md = md.replace('<!--TABLEROW-->', row + "<!--TABLEROW-->")
-
-row  = "\n| ----- | --- | ---- | ----------- | ------ |"
-
-md = md.replace('<!--TABLEROW-->', row + "<!--TABLEROW-->")
+fields = ["Manufacturer", "Part", "Vendor", "SKU"]
+pfields = [False] * len(fields)
 
 components = net.getInterestingComponents()
 
@@ -142,7 +133,9 @@ components = net.getInterestingComponents()
 # (see kicad_netlist_reader.py)
 grouped = net.groupComponents(components)
 
-# Output all of the component information
+rows = []
+ncomp = 0
+
 for group in grouped:
     refs = ""
 
@@ -154,17 +147,47 @@ for group in grouped:
         if len(refs) > 0:
             refs += ", "
         refs += component.getRef()
+        ncomp += 1
         c = component
     if len(refs) == 0:
         continue
     
-    row = "\n"
-    row += "| " + refs +" | " + str(len(group))
-    row += " | " + c.getValue() + " | "
-#    row += c.getLibName() + ":"
-    row += c.getDescription() + " | " + c.getField("Vendor")
-    row += " |"
+    rows.append([refs, str(len(group)), c.getValue(), c.getDescription()])
+    for fi in range(len(fields)):
+        fv = c.getField(fields[fi])
+        rows[-1].append(fv)
+        if not fv == "":
+            pfields[fi] = True
+        
+# Output a set of rows for a header providing general information
 
+md = md.replace('<!--SOURCE-->', os.path.basename(net.getSource()))
+md = md.replace('<!--DATE-->', net.getDate())
+md = md.replace('<!--TOOL-->', net.getTool())
+md = md.replace('<!--COMPCOUNT-->', "**Component Count:** " + str(ncomp))
+
+# Output header for the table of components
+                
+row1  = "| Refs | Qty | Component | Description |"
+row2  = "\n| ----- | --- | ---- | ----------- |"
+
+for fi in range(len(fields)):
+    if pfields[fi]:
+        row1 += " " + fields[fi] + " |"
+        row2 += " ---- |"
+        
+md = md.replace('<!--TABLEROW-->', row1 + "<!--TABLEROW-->")
+md = md.replace('<!--TABLEROW-->', row2 + "<!--TABLEROW-->")
+
+# Output components
+
+for r in rows:
+    row = "\n|"
+    for ri in range(4):
+        row += " " + r[ri] + " |"
+    for ri in range(4,len(r)):
+        if pfields[ri-4]:
+            row += " " + r[ri] + " |"
     md = md.replace('<!--TABLEROW-->', row + "<!--TABLEROW-->")
 
 # Print the formatted md to output file

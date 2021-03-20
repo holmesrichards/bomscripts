@@ -3,10 +3,10 @@ KiCad plugin for grouped BOM in Markdown format
 
 Add this to your KiCad 5.x plugins and use it like any other BOM plugin...
 
-Generate a Markdown BOM list.
-Components are sorted and grouped by value
-Fields are (if exist)
-Ref, Quantity, Value, Part, Description, Vendor
+Components are sorted and grouped by value.
+Fields included are (if existing)
+Refs, Quantity, Component, Description, Manufacturer, Part, Vendor, SKU
+Columns after "Description" are suppressed if empty for all components.
 Parts with "Config" field containing "dnf" are omitted.
 
 Command line:
