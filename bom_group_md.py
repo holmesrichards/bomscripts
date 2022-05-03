@@ -13,10 +13,8 @@
     Fields are (if exist)
     Ref, Quantity, Value, Part, Description, Vendor
     Parts with "Config" field containing "dnf" are omitted.
-
     Command line:
     python "pathToFile/bom_group_md.py" netlist-file markdown-file [--todocs]
-
     If --todocs is used, replace path for output file with
     /project/path/Docs where /project/path is the specified or
     implicit directory or one at a higher level. If no such Docs
@@ -49,13 +47,9 @@ def findDocs (path):
     
 # Start with a basic md template
 md = """# <!--SOURCE--> BOM
-
 <!--DATE-->
-
 Generated from schematic by <!--TOOL-->
-
 <!--COMPCOUNT-->
-
 <!--TABLEROW-->
     """
 
@@ -63,12 +57,10 @@ def myEqu(self, other):
     """myEqu is a more advanced equivalence function for components which is
     used by component grouping. Normal operation is to group components based
     on their Value and Footprint.
-
     In this example of a more advanced equivalency operator we also compare the
     custom fields Voltage, Tolerance and Manufacturer as well as the assigned
     footprint. If these fields are not used in some parts they will simply be
     ignored (they will match as both will be empty strings).
-
     """
     cfields = ["Tolerance", "Manufacturer", "Part", "Vendor", "SKU", "Voltage"]
     result = True
@@ -152,7 +144,11 @@ for group in grouped:
     if len(refs) == 0:
         continue
     
-    rows.append([refs, str(len(group)), c.getValue(), c.getDescription()])
+    d = c.getField("Description")
+    if d=="":
+        d = c.getDescription()
+    rows.append([refs, str(len(group)), c.getValue(), d])
+    #rows.append([refs, str(len(group)), c.getValue(), c.getDescription()])
     for fi in range(len(fields)):
         fv = c.getField(fields[fi])
         rows[-1].append(fv)
