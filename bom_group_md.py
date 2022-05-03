@@ -47,9 +47,13 @@ def findDocs (path):
     
 # Start with a basic md template
 md = """# <!--SOURCE--> BOM
+
 <!--DATE-->
+
 Generated from schematic by <!--TOOL-->
+
 <!--COMPCOUNT-->
+
 <!--TABLEROW-->
     """
 
