@@ -42,9 +42,11 @@ def rkey(value):
     else:
         valn = value[:-1]
         valx = value[-1]
+    while valn[0] == '0' and valn != "":
+        valn = valn[1:]
 
     # Check if not standard format
-    if re.search ("[^0-9RkM.]", valn):
+    if valn[0] < '1' or valn[0] > '9' or re.search ("[^0-9RkM.]", valn):
         if xxy:
             return "zzzzzzzz"
         else:

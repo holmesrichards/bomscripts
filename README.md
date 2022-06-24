@@ -31,6 +31,14 @@ Command line:
 python "pathToFile/bom_resistors.py" netlist-file text-file [--xxy] [--todocs]
 ```
 
-If --xxy is used, values are internally converted to 3-digit representation (2 significant figures + number of zeroes, e.g. 124 for 120k) for sorting. Otherwise numerical value (e.g. 120000 for 120k) is used. Values not conforming to expected format are put last.
+If --xxy is used, values are internally converted to 3-digit representation (2 significant figures + number of zeroes, e.g. 124 for 120k) for sorting. Otherwise numerical value (e.g. 120000 for 120k) is used.
 
 If --todocs is used, path for output file is replaced with `/project/path/Docs` where `/project/path` is the specified or implicit output directory or one at a higher level. If no such Docs directory is found, specified or implicit path is used instead.
+
+Expects values consisting of up to two significant figures followed by zeroes, with or without a decimal point, followed by R or k or M. Values not conforming to expected format are put last.
+
+### Known issues
+
+Does not recognize values with format like 1k2 or 4M7.
+
+(Also does not recognize K instead of k, m instead of M, or r instead of R, but that is a feature, not a bug.)
